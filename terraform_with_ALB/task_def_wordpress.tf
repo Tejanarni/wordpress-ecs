@@ -127,9 +127,9 @@ resource "aws_ecs_service" "test-service-wordpress-main" {
   depends_on = [aws_iam_role_policy_attachment.ecs_task_execution_role, aws_ecs_service.test-service-mysql]
 }
 
-data "aws_ecr_repository" "example" {
-  name = "wordpress"
-}
+# data "aws_ecr_repository" "example" {
+#   name = "wordpress"
+# }
 # data "aws_ecr_image" "service_image" {
 #   repository_name = "wordpress"
 #   image_tag = "master"
@@ -139,14 +139,14 @@ data "aws_ecr_repository" "example" {
 # }
 
 
-data "external" "current_image" {
-  program = ["bash", "./ecs-task-definition.sh"]
-  # query = {
-  #   app  = "testapp-service-wordpress-main"
-  #   cluster = "wordpress-cluster"
-  #   # path_root = "${jsonencode(path.root)}"
-  # }
-}
+# data "external" "current_image" {
+#   program = ["bash", "./ecs-task-definition.sh"]
+#   # query = {
+#   #   app  = "testapp-service-wordpress-main"
+#   #   cluster = "wordpress-cluster"
+#   #   # path_root = "${jsonencode(path.root)}"
+#   # }
+# }
 # output "get_new_tag" {
 #   value = data.external.current_image.result["image_tag"]
 # }
