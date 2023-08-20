@@ -52,7 +52,7 @@ resource "aws_ecs_task_definition" "wordpress-main" {
         {
           "name": "WORDPRESS_CACHE_HOST",
           "value": "127.0.0.1:3306"
-        },
+        }
 
       ],
       "resourceRequirements": null,
