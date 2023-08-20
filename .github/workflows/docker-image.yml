@@ -69,7 +69,7 @@ jobs:
         run: |
           cd terraform_with_ALB
           terraform apply -auto-approve -input=false
-      # - name: Terraform destroy
-      #   run: |
-      #     cd terraform_with_ALB
-      #     terraform destroy -auto-approve -input=false
+      - name: Terraform destroy
+        run: |
+          cd terraform_with_ALB
+          terraform destroy -auto-approve -input=false
