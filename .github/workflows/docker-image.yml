@@ -65,10 +65,10 @@ jobs:
           cd terraform_with_ALB
           terraform plan -no-color -input=false
         continue-on-error: true
-      # - name: Terraform Apply
-      #   run: |
-      #     cd terraform_with_ALB
-      #     terraform apply -auto-approve -input=false
+      - name: Terraform Apply
+        run: |
+          cd terraform_with_ALB
+          terraform apply -auto-approve -input=false
       # - name: Terraform destroy
       #   run: |
       #     cd terraform_with_ALB
