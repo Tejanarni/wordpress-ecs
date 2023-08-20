@@ -1,0 +1,81 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: wp-dep-2
+  namespace: wordpress
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: wordpress-2
+  template:
+    metadata:
+      labels:
+        app: wordpress-2
+    spec:
+      # securityContext:
+      #       fsGroup: 1000
+      #       runAsUser: 0
+      # serviceAccountName: wordpress-sa
+      # serviceAccountName: secret-manager-service-account
+      containers:
+        - name: wordpress-container-2
+          image: wordpress:latest
+          # resources:
+          #   limits:
+          #     memory: "2Gi"
+          #     cpu: "1000m"
+          #   requests:
+          #     memory: "500Mi"
+          #     cpu: "500m"
+          ports:
+            - containerPort: 80
+          env:
+            - name: WORDPRESS_DB_HOST
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-secert
+                  key: host
+            - name: WORDPRESS_DB_PORT
+              value: "3306"
+            - name: WORDPRESS_DB_USER
+              value: admin
+            - name: WORDPRESS_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: mysql-secert
+                  key: password
+            - name: WORDPRESS_DB_NAME
+              value: wordpress
+          livenessProbe:
+            httpGet:
+              path: "/"
+              port: 80
+            initialDelaySeconds: 90
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 5
+          readinessProbe:
+            httpGet:
+              path: "/"
+              port: 80
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          volumeMounts: 
+            - name: wordpress-file
+              mountPath: /var/www/html
+            # - name: secrets-store-inline
+            #   mountPath: "/mnt/secrets-store"
+            #   readOnly: true
+      volumes:
+        - name: wordpress-file
+          persistentVolumeClaim:
+              claimName: efs-pvc
+        # - name: secrets-store-inline
+        #   csi:
+        #     driver: secrets-store.csi.k8s.io
+        #     readOnly: true
+        #     volumeAttributes:
+        #       secretProviderClass: "secrets-provider" 

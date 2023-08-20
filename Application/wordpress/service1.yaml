@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: wp-svc-1
+  namespace: wordpress
+spec:
+  selector:
+    app: wordpress-1
+  ports:
+    - protocol: TCP
+      port: 5000
+      targetPort: 80
+  type: NodePort

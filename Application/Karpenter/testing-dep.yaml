@@ -1,0 +1,82 @@
+# apiVersion: apps/v1
+# kind: Deployment
+# metadata:
+#   name: inflate
+# spec:
+#   replicas: 2
+#   selector:
+#     matchLabels:
+#       app: inflate
+#   template:
+#     metadata:
+#       labels:
+#         app: inflate
+#     spec:
+#       nodeSelector:
+#         intent: apps
+#       containers:
+#         - name: inflate
+#           image: public.ecr.aws/eks-distro/kubernetes/pause:3.2
+#           resources:
+#             requests:
+#               cpu: 1
+#               memory: 1.5Gi
+#       affinity:
+#         nodeAffinity:
+#           requiredDuringSchedulingIgnoredDuringExecution:
+#             nodeSelectorTerms:
+#             - matchExpressions:
+#               - key: node
+#                 operator: In
+#                 values:
+#                 - workernode3
+# ---
+# apiVersion: v1
+# kind: Namespace
+# metadata:
+#   name: affinityns
+# ---
+# apiVersion: apps/v1
+# kind: Deployment
+# metadata:
+#   name: example-deployment
+#   namespace: affinityns
+# spec:
+#   replicas: 1
+#   selector:
+#     matchLabels:
+#       app: example-app
+#   template:
+#     metadata:
+#       labels:
+#         app: example-app
+#     spec:
+#       containers:
+#       - name: example-container
+#         image: public.ecr.aws/eks-distro/kubernetes/pause:3.2
+#         # Add container configuration here
+        
+#       affinity:
+#         nodeAffinity:
+#           requiredDuringSchedulingIgnoredDuringExecution:
+#             nodeSelectorTerms:
+#             - matchExpressions:
+#               - key: node
+#                 operator: In
+#                 values:
+#                 - workernode1
+
+# ---
+# apiVersion: v1
+# kind: Service
+# metadata:
+#   name: example-svc
+#   namespace: affinityns
+# spec:
+#   selector:
+#     app: example-app
+#   type: ClusterIP
+#   ports:
+#     - protocol: 'TCP'
+#       targetPort: 80
+#       port: 8088

@@ -1,0 +1,106 @@
+# ---
+# apiVersion: argoproj.io/v1alpha1
+# kind: AppProject
+# metadata:
+#   name: practice-cd-stack
+#   namespace: argocd
+#   finalizers:
+#     - resources-finalizer.argocd.argoproj.io
+# spec:
+#   description: cloud infra manifests
+#   clusterResourceWhitelist:
+#   - group: '*'
+#     kind: '*'
+#   sourceRepos:
+#   - https://github.com/kirupakaran369/agrocd-demo.git
+#   - https://charts.jetstack.io
+#   destinations:
+#   - namespace: kube-system
+#     server: https://kubernetes.default.svc
+#   - namespace: argocd
+#     server: https://kubernetes.default.svc
+#   - namespace: demo
+#     server: https://kubernetes.default.svc
+#   - namespace: grafana
+#     server: https://kubernetes.default.svc
+#   - namespace: default
+#     server: https://kubernetes.default.svc
+#   - namespace: devops-tools
+#     server: https://kubernetes.default.svc
+#   - namespace: cert-manager
+#     server: https://kubernetes.default.svc
+# # ---
+# # apiVersion: argoproj.io/v1alpha1
+# # kind: Application
+# # metadata:
+# #   name: grafana-stack
+# #   namespace: argocd
+# #   finalizers:
+# #   - resources-finalizer.argocd.argoproj.io
+# # spec:
+# #   project: practice-cd-stack
+# #   source:
+# #     repoURL: https://github.com/kirupakaran369/agrocd-demo.git
+# #     targetRevision: master
+# #     path: Application/grafana
+# #     directory:
+# #       recurse: true
+# #   destination:
+# #     server: https://kubernetes.default.svc
+# #     namespace: grafana
+# #   syncPolicy:
+# #     automated:
+# #       selfHeal: true
+# #       allowEmpty: true
+# #       prune: true
+
+# ---
+# apiVersion: argoproj.io/v1alpha1
+# kind: Application
+# metadata:
+#   name: jenkins-stack
+#   namespace: argocd
+#   finalizers:
+#   - resources-finalizer.argocd.argoproj.io
+# spec:
+#   project: practice-cd-stack
+#   source:
+#     repoURL: https://github.com/kirupakaran369/agrocd-demo.git
+#     targetRevision: master
+#     path: Application/Jenkins
+#     directory:
+#       recurse: true
+#   destination:
+#     server: https://kubernetes.default.svc
+#     namespace: devops-tools
+#   syncPolicy:
+#     automated:
+#       selfHeal: true
+#       allowEmpty: true
+#       prune: true
+# ---
+# apiVersion: argoproj.io/v1alpha1
+# kind: Application
+# metadata:
+#   name: cert-manager-helm-stack
+#   namespace: argocd
+# spec:
+#   project: practice-cd-stack
+#   source:
+#     chart: cert-manager
+#     repoURL: https://charts.jetstack.io
+#     targetRevision: "1.7.1" 
+#     helm:
+#       releaseName: cert-manager
+#       values: |
+#          installCRDs: true
+#   destination:
+#     server: "https://kubernetes.default.svc"
+#     namespace: cert-manager
+#   syncPolicy:
+#     syncOptions:
+#       - CreateNamespace=true
+#     automated:
+#       prune: true
+#       selfHeal: true
+

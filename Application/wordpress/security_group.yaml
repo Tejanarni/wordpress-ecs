@@ -1,0 +1,14 @@
+# ---
+# apiVersion: vpcresources.k8s.aws/v1beta1
+# kind: SecurityGroupPolicy
+# metadata:
+#   name: wp-securitygroup
+# spec:
+#   podSelector:
+#     matchLabels:
+#       app: wordpress
+#   securityGroups:
+#     groupIds:
+#       - sg-123456
+#       - sg-123456
+

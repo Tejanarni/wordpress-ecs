@@ -1,0 +1,199 @@
+---
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+metadata:
+  name:  wordpress
+  region: ap-south-1
+  version: "1.27"
+  tags:
+     Classification: "Internal Use"
+     Region: "ap-south-1"
+     Function: "Kubernetes"
+# secretsEncryption:
+#   # ARN of the KMS key
+#   keyARN: arn:aws:kms:ap-south-1:
+iam:
+  # serviceRoleARN: "arn:aws:iam::"
+  withOIDC: true
+  serviceAccounts:
+    - metadata:
+         name: s3-reader
+         namespace: default
+         labels: {aws-usage: "application"}
+      attachPolicyARNs:
+        - "arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess"
+    - metadata:
+         name: aws-load-balancer-controller
+         namespace: kube-system
+      wellKnownPolicies:
+        awsLoadBalancerController: true
+    - metadata:
+         name: ebs-csi-controller-sa
+         namespace: kube-system
+      wellKnownPolicies:
+         ebsCSIController: true
+    # - metadata:
+    #     name: efs-csi-controller-sa
+    #     namespace: kube-system
+    #   wellKnownPolicies:
+    #     efsCSIController: true
+    # - metadata:
+    #     name: cert-manager
+    #     namespace: cert-manager
+      # wellKnownPolicies:
+      #   certManager: true
+    - metadata:
+        name: cluster-autoscaler
+        namespace: kube-system
+        labels: {aws-usage: "cluster-ops"}
+      wellKnownPolicies:
+        autoScaler: true
+    - metadata:
+        name: build-service
+        namespace: ci-cd
+      wellKnownPolicies:
+        imageBuilder: true
+    - metadata:
+        name: autoscaler-service
+        namespace: kube-system
+      attachPolicy: # inline policy can be defined along with `attachPolicyARNs`
+        Version: "2012-10-17"
+        Statement:
+        - Effect: Allow
+          Action:
+          - "autoscaling:DescribeAutoScalingGroups"
+          - "autoscaling:DescribeAutoScalingInstances"
+          - "autoscaling:DescribeLaunchConfigurations"
+          - "autoscaling:DescribeTags"
+          - "autoscaling:SetDesiredCapacity"
+          - "autoscaling:TerminateInstanceInAutoScalingGroup"
+          - "ec2:DescribeLaunchTemplateVersions"
+          Resource: '*'
+vpc:
+  id: "vpc-0bafbe97c1d5315fa"  # (optional, must match VPC ID used for each subnet below) ## need to change
+  securityGroup: "sg-03561ecb75bedbfca" ## need to change all traffic allow not ssh allow 
+  #cidr: "10.13.0.0/18"       # (optional, must match CIDR used by the given VPC)
+  subnets:
+    # must provide 'private' and/or 'public' subnets by availibility zone as shown
+    private:
+      ap-south-1a:
+        id: "subnet-007ab8010a244f2b4" ## need to change
+      #  cidr: "10.13.8.0/21" # (optional, must match CIDR used by the given subnet)
+      ap-south-1b:
+        id: "subnet-07c3844b5fcd15009" ## need to change
+       # cidr: "10.13.16.0/21"  # (optional, must match CIDR used by the given subnet)
+    public: # for practice only don't use public subnet for node-group
+      ap-south-1a:
+        id: "subnet-007ab8010a244f2b4" ## need to change
+      ap-south-1c:
+        id: "subnet-05633c3d111ed03ec" ## need to change
+      # ap-south-1c:
+      #   id: "subnet-062fa21ff1a5ab5d0"
+      #   cidr: "143.0.80.0/20"   # (optional, must match CIDR used by the given subnet)
+  clusterEndpoints:
+    privateAccess: true
+    publicAccess: true
+  # publicAccessCIDRs:
+  #   - 0.0.0.0/0
+addons:
+  - name: vpc-cni # no version is specified so it deploys the default version
+    version: latest
+    attachPolicyARNs:
+      - arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy
+  - name: coredns
+    version: latest # auto discovers the latest available
+  - name: kube-proxy
+    version: latest
+  - name: aws-ebs-csi-driver
+    version: latest
+  # - name: kubecost_kubecost
+  #   version: latest
+    # version: v1.98.0-eksbuild.1
+  # - name: upbound_universal-crossplane
+  #   version: latest
+ 
+cloudWatch:
+      clusterLogging:
+          # enable specific types of cluster control plane logs
+          enableTypes: ["api", "audit", "authenticator", "controllerManager", "scheduler"]
+          # all supported types: "api", "audit", "authenticator", "controllerManager", "scheduler"
+          # supported special values: "*" and "all"
+managedNodeGroups:
+  - name:  wordpress
+    ssh:
+      allow: true
+      publicKeyName: wordpress
+      enableSsm: true
+    volumeSize: 30
+    volumeType: gp3
+    # volumeEncrypted: true
+    # volumeKmsKeyID: 
+    amiFamily: "AmazonLinux2"
+    #containerRuntime: containerd
+    instanceType: t3.medium
+    desiredCapacity: 2
+    privateNetworking: true
+    tags:
+    # EC2 tags required for cluster-autoscaler auto-discovery
+        Classification: "Internal Use"
+        Region: "ap-south-1"
+        # Environment: "development"
+        technical:platformtype: Amazon Linux 2
+        Function: "Kubernetes"
+        # k8s.io/cluster-autoscaler/enabled: "true"
+        # k8s.io/cluster-autoscaler/cluster-13: "owned"
+    iam:
+      #instanceRoleARN: arn:aws:iam::
+      attachPolicyARNs:
+        - arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy
+        - arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly
+        - arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore
+        - arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy
+      withAddonPolicies:
+        imageBuilder: true
+        externalDNS: true
+        certManager: true
+        albIngress: true
+        cloudWatch: true
+        appMesh: true
+        autoScaler: true
+        ebs: true
+        efs: true
+        xRay: true
+    subnets:
+      - subnet-007ab8010a244f2b4
+
+  ###install required packages##
+
+#   echo -n "admin123" | base64
+
+# #install required packages
+# helm repo add aws-efs-csi-driver https://kubernetes-sigs.github.io/aws-efs-csi-driver/
+# helm upgrade --install aws-efs-csi-driver --namespace kube-system aws-efs-csi-driver/aws-efs-csi-driver
+
+# helm repo add eks https://aws.github.io/eks-charts
+
+# helm repo update eks
+
+# helm install aws-load-balancer-controller eks/aws-load-balancer-controller \
+#   -n kube-system \
+#   --set clusterName=wordpress \
+#   --set serviceAccount.create=false \
+#   --set serviceAccount.name=aws-load-balancer-controller
+
+##need to install argocd 
+
+## ref argocd-ref folder to deploy ingress and services for https and git connection for secerts
+
+###https://docs.aws.amazon.com/systems-manager/latest/userguide/integrating_csi_driver.html is document used to install secerts (ssm-parameter), add ssm full access to the nodes
+
+##{"host":"deleteme.czacpbvgfcja.ap-south-1.rds.amazonaws.com","password": "admin"}
+
+# kubectl edit cm aws-auth -n kube-system (kubectl get clusterrole)
+
+#     - groups:
+#       - system:masters
+#       rolearn: arn:aws:iam::
+#       username: admin
+
+# edit and save it

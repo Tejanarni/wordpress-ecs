@@ -1,0 +1,9 @@
+---
+  apiVersion: v1
+  kind: Namespace
+  metadata:
+      name: wordpress
+      labels:
+        Purpose: wordpress-application
+        Region: ap-south-1
+        Environment: Development

@@ -1,0 +1,37 @@
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: wordpress-ingress
+  namespace: wordpress
+  annotations:
+    alb.ingress.kubernetes.io/load-balancer-name: wp-alb
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: instance
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS": 443}]'
+    alb.ingress.kubernetes.io/security-groups: sg-0b05867cd639807e4
+    alb.ingress.kubernetes.io/subnets: subnet-05856e4871f8ce760, subnet-082b685d66363a4a0
+    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:ap-south-1:600167738142:certificate/3fcecbf7-dcf4-488b-92ec-ff02b95534fd
+spec:
+  ingressClassName: alb
+  rules:
+    - host: sk-argocd.pcf.asgardmap.net
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: wp-svc-1
+                port:
+                  number: 5000
+    - host: sk-jenkin.pcf.asgardmap.net
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: wp-svc-2
+                port:
+                  number: 5001

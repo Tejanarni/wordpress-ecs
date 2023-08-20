@@ -1,0 +1,21 @@
+# apiVersion: networking.k8s.io/v1
+# kind: Ingress
+# metadata:
+#   namespace: devops-tools
+#   name: ingress-jenkins
+#   annotations:
+#     kubernetes.io/ingress.class: alb
+#     alb.ingress.kubernetes.io/scheme: internet-facing
+#     alb.ingress.kubernetes.io/target-type: ip
+#     alb.ingress.kubernetes.io/subnets: subnet-05856e4871f8ce760, subnet-082b685d66363a4a0
+# spec:
+#   rules:
+#     - http:
+#         paths:
+#           - path: /
+#             pathType: Prefix
+#             backend:
+#               service:
+#                 name: jenkins-service
+#                 port:
+#                   number: 5000

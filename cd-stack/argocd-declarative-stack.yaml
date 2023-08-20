@@ -1,0 +1,36 @@
+# ---
+# apiVersion: argoproj.io/v1alpha1
+# kind: AppProject
+# metadata:
+#   name: project-alpha
+#   namespace: argocd
+# spec:
+#   sourceRepos:
+#   - https://github.com/kirupakaran369/agrocd-demo.git
+#   destinations:
+#   - namespace: argocd
+#     server: https://kubernetes.default.svc
+#   - namespace: grafana
+#     server: https://kubernetes.default.svc
+#   clusterResourceWhitelist:
+#   - group: '*'
+#     kind: '*'
+# ---
+# apiVersion: argoproj.io/v1alpha1
+# kind: Application
+# metadata:
+#   name: project-alpha
+#   namespace: argocd
+# spec:
+#   project: project-alpha
+#   source:
+#     repoURL: https://github.com/kirupakaran369/agrocd-demo.git
+#     targetRevision: master
+#     path: Application/grafana
+#   destination:
+#     server: https://kubernetes.default.svc
+#     namespace: grafana
+#   syncPolicy:
+#     automated:
+#       prune: true
+#       selfHeal: true
